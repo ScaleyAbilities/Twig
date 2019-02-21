@@ -6,7 +6,10 @@ namespace Twig
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            SqlHelper.OpenSqlConnection();
+
+            Console.WriteLine("Twig running...");
+
         }
     }
 }
