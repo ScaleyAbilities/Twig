@@ -16,13 +16,24 @@ namespace Twig
         public static DataTable GetTriggers()
         {
             var query = SqlHelper.CreateSqlCommand();
-            query.CommandText = "SELECT * FROM transactions WHERE type LIKE '%trigger%'";
+            query.CommandText = @"SELECT * FROM transactions 
+                                    WHERE type = 'trigger' 
+                                ";
             query.Prepare();
 
             var dt = new DataTable();
             dt.Load(query.ExecuteReader());
 
             return dt;
+        }
+
+        public static void UpdateStockPrice(String stockSymbol)
+        {
+            //TODO - this
+            /*
+                Get stock prices from quote cache api
+
+             */
         }
     }
 }
