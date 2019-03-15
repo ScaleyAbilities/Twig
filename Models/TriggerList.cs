@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace Twig
 {
-    public class TriggerList : Dictionary<String, Dictionary<String, SortedSet<Tuple<decimal, User>>>>
+    public class TriggerList : Dictionary<String, Dictionary<String, SortedSet<Tuple<decimal, String>>>>
     {
-        public void Add(String Symbol, String Choice, decimal Price, User u)
+        public void Add(String Symbol, String Choice, decimal Price, String u)
         {
             Choice = Choice.ToLower();
             if(!Choice.Equals("buy") && !Choice.Equals("sell")) return;
 
             // Checks if the StockSymbol and Buy/Sell keys are in the object, adds if not
             if(!this.ContainsKey(Symbol)) {
-                this[Symbol] = new Dictionary<string, SortedSet<Tuple<decimal, User>>>();
-                this[Symbol]["buy"] = new SortedSet<Tuple<decimal, User>>();
-                this[Symbol]["sell"] = new SortedSet<Tuple<decimal, User>>();
+                this[Symbol] = new Dictionary<string, SortedSet<Tuple<decimal, String>>>();
+                this[Symbol]["buy"] = new SortedSet<Tuple<decimal, String>>();
+                this[Symbol]["sell"] = new SortedSet<Tuple<decimal, String>>();
             }
 
             // Adds the price and user data
@@ -44,9 +44,7 @@ namespace Twig
         {
             // Display the number of command line arguments:
             System.Console.WriteLine(args.Length + " args");
-            User me = new User();
-            me.Id = 123;
-            me.Username = "Rick";
+            String me = "Rick";
             TriggerList obj = new TriggerList();
             obj.Add("aks","buy", 3.90m, me);
             obj.Add("aks","buy", 2.99m, me);
