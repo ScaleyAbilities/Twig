@@ -8,7 +8,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace Titanoboa
+namespace Twig
 {
     static class RabbitHelper
     {
@@ -16,13 +16,15 @@ namespace Titanoboa
         private static IModel rabbitChannel;
 
         private static string rabbitHost = Environment.GetEnvironmentVariable("RABBIT_HOST") ?? "localhost";
-        private static string rabbitCommandQueue = "commands";
+        private static string rabbitTriggerTxQueue = "triggerCompleted";
+        public static string rabbitTriggerRxQueue = "triggerPending";
         private static IBasicProperties rabbitProperties;
 
-        static RabbitHelper() 
+        static RabbitHelper()
         {
             // Ensure Rabbit Queue is set up
-            var factory = new ConnectionFactory() { 
+            var factory = new ConnectionFactory()
+            {
                 HostName = rabbitHost,
                 UserName = "scaley",
                 Password = "abilities"
@@ -43,11 +45,19 @@ namespace Titanoboa
                     Thread.Sleep(3000);
                 }
             }
-            
+
             rabbitChannel = rabbitConnection.CreateModel();
 
             rabbitChannel.QueueDeclare(
-                queue: rabbitCommandQueue,
+                queue: rabbitTriggerTxQueue,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null
+            );
+
+            rabbitChannel.QueueDeclare(
+                queue: rabbitTriggerRxQueue,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
@@ -67,7 +77,7 @@ namespace Titanoboa
             consumer.Received += (model, ea) =>
             {
                 JObject message = null;
-                try 
+                try
                 {
                     message = JObject.Parse(Encoding.UTF8.GetString(ea.Body));
                 }
@@ -75,7 +85,7 @@ namespace Titanoboa
                 {
                     Console.Error.WriteLine($"Unable to parse Queue message into JSON: {ex.Message}");
                 }
-                
+
                 if (message != null)
                     messageCallback(message);
 
@@ -85,9 +95,19 @@ namespace Titanoboa
 
             // This will begin consuming messages asynchronously
             rabbitChannel.BasicConsume(
-                queue: rabbitCommandQueue,
+                queue: rabbitTriggerRxQueue,
                 autoAck: false,
                 consumer: consumer
+            );
+        }
+
+        public static void PushTrigger(JObject properties)
+        {
+            rabbitChannel.BasicPublish(
+                exchange: "",
+                routingKey: rabbitTriggerTxQueue,
+                basicProperties: rabbitProperties,
+                body: Encoding.UTF8.GetBytes(properties.ToString(Formatting.None))
             );
         }
     }
