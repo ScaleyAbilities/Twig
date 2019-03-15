@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Twig;
 
-namespace Titanoboa.Models
+namespace Twig
 {
     public class TriggerList : Dictionary<String, Dictionary<String, SortedSet<Tuple<decimal, User>>>>
     {

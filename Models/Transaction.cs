@@ -1,5 +1,3 @@
-using Twig;
-
 namespace Twig
 {
     public class Transaction
