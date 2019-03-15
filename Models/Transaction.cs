@@ -1,7 +1,7 @@
 using Twig;
 
 namespace Twig
-{}
+{
     public class Transaction
     {
         public ulong Id { get; set; }
