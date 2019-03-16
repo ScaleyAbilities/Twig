@@ -24,18 +24,18 @@ namespace Twig
             }
 
             string command = json["cmd"].ToString().ToUpper();
-            string username = json["usr"].ToString();
-            string stock = json["stock"].ToString();    
+            string user = json["usr"].ToString(); 
             JObject commandParams = (JObject)json["params"];
+            string stock = commandParams["stock"].ToString();
+            decimal price = (decimal)commandParams["price"];
 
             TriggerList tl = new TriggerList();
 
-            // If add command
-                // Add
-            // If cancel
-                // Cancel
-            // Run the command to add trigger
-            
+            if (command.Equals("BUY") || command.Equals("SELL")) {
+                tl.Add(stock, command, user, price);
+            } else if (command.Equals("CANCEL_BUY") || command.Equals("CANCEL_SELL")) {
+                tl.Remove(stock, command, user);
+            }
         }
 
         static async Task Main(string[] args)
