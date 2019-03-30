@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
@@ -71,15 +72,15 @@ namespace Twig
             rabbitProperties.Persistent = true;
         }
 
-        public static void CreateConsumer(Action<JObject> messageCallback)
+        public static void CreateConsumer(Func<JObject, TriggerList, Task> messageCallback, TriggerList tl)
         {
-            var consumer = new EventingBasicConsumer(rabbitChannel);
-            consumer.Received += (model, ea) =>
+            var consumer = new AsyncEventingBasicConsumer(rabbitChannel);
+            consumer.Received += async (model, eventArgs) =>
             {
                 JObject message = null;
                 try
                 {
-                    message = JObject.Parse(Encoding.UTF8.GetString(ea.Body));
+                    message = JObject.Parse(Encoding.UTF8.GetString(eventArgs.Body));
                 }
                 catch (JsonReaderException ex)
                 {
@@ -87,10 +88,10 @@ namespace Twig
                 }
 
                 if (message != null)
-                    messageCallback(message);
+                    await messageCallback(message, tl);
 
                 // We will always ack even if we can't parse it otherwise queue will hang
-                rabbitChannel.BasicAck(ea.DeliveryTag, false);
+                rabbitChannel.BasicAck(eventArgs.DeliveryTag, false);
             };
 
             // This will begin consuming messages asynchronously

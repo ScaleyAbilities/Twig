@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace Twig
@@ -32,14 +33,24 @@ namespace Twig
             }
         }
 
-        public void CheckStockTriggers(String Symbol, decimal StockPrice)
+        public async Task CheckStockTriggers(String Symbol, decimal StockPrice)
         {
+            Task Buy = Task.Run(() => this.CheckBuy(Symbol,StockPrice));
+            Task Sell = Task.Run(() => this.CheckSell(Symbol,StockPrice));
+            Task.WaitAll(Buy, Sell);
+
+            // Removes Symbol if there are no Triggers
+            await Task.Run(() => {
+                if (this[Symbol]["BUY"].Count == 0 && this[Symbol]["SELL"].Count == 0)
+                    this.Remove(Symbol);
+            });
+        }
+
+
+        public void CheckBuy(String Symbol, decimal StockPrice) {
+
             var BuyStock = this[Symbol]["BUY"].ToList();
             BuyStock.Sort((x, y) => x.Value.CompareTo(y.Value));
-
-            var SellStock = this[Symbol]["SELL"].ToList();
-            SellStock.Sort((x, y) => x.Value.CompareTo(y.Value));
-            SellStock.Reverse();
 
             while (BuyStock.Count > 0 && BuyStock[0].Value >= StockPrice)
             {
@@ -57,6 +68,13 @@ namespace Twig
                 this[Symbol]["BUY"].Remove(BuyStock[0].Key);
                 BuyStock.Remove(BuyStock[0]);
             }
+        }
+
+        public void CheckSell(String Symbol, decimal StockPrice) {
+
+            var SellStock = this[Symbol]["SELL"].ToList();
+            SellStock.Sort((x, y) => x.Value.CompareTo(y.Value));
+            SellStock.Reverse();
 
             while (SellStock.Count > 0 && SellStock[0].Value <= StockPrice)
             {
@@ -77,6 +95,7 @@ namespace Twig
         }
 
         public void Remove(String Symbol, String Command, String u) {
+            // Does a trigger have to be canceled before they can set a new one?
             if(Command.Equals("CANCEL_BUY")) {
                 this[Symbol]["BUY"].Remove(u);
             } else if(Command.Equals("CANCEL_SELL")) {
