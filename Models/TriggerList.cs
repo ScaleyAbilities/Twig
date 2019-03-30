@@ -35,8 +35,8 @@ namespace Twig
 
         public async Task CheckStockTriggers(String Symbol, decimal StockPrice)
         {
-            Task Buy = Task.Run(() => this.CheckBuy(Symbol,StockPrice));
-            Task Sell = Task.Run(() => this.CheckSell(Symbol,StockPrice));
+            Task Buy = Task.Run(() => CheckBuy(Symbol, StockPrice));
+            Task Sell = Task.Run(() => CheckSell(Symbol, StockPrice));
             Task.WaitAll(Buy, Sell);
 
             // Removes Symbol if there are no Triggers

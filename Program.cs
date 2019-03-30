@@ -57,12 +57,12 @@ namespace Twig
 
             while (true)
             {
-                var completed = await Task.WhenAny(quitSignalled.Task, Task.Delay(60000));
+                var completed = await Task.WhenAny(quitSignalled.Task, Task.Delay(40000));
 
                 if (completed == quitSignalled.Task)
                     break;
 
-                var tasks = tl.Keys.Select(sym => tl.CheckStockTriggers(sym, 55m)); // TODO stock quotes
+                var tasks = tl.Keys.Select(async sym => tl.CheckStockTriggers(sym, await QuoteHelper.GetQuote(sym)));
                 await Task.WhenAll(tasks);
             }
 
