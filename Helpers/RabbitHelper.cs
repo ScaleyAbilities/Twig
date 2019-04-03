@@ -17,8 +17,7 @@ namespace Twig
         private static IModel rabbitChannel;
 
         private static string rabbitHost = Environment.GetEnvironmentVariable("RABBIT_HOST") ?? "localhost";
-        private static string rabbitTriggerTxQueue = "triggerCompleted";
-        public static string rabbitTriggerRxQueue = "triggerPending";
+        public static string rabbitTriggerPendingQueue = "triggerPending";
         private static IBasicProperties rabbitProperties;
 
         static RabbitHelper()
@@ -50,15 +49,7 @@ namespace Twig
             rabbitChannel = rabbitConnection.CreateModel();
 
             rabbitChannel.QueueDeclare(
-                queue: rabbitTriggerTxQueue,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null
-            );
-
-            rabbitChannel.QueueDeclare(
-                queue: rabbitTriggerRxQueue,
+                queue: rabbitTriggerPendingQueue,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
@@ -96,7 +87,7 @@ namespace Twig
 
             // This will begin consuming messages asynchronously
             rabbitChannel.BasicConsume(
-                queue: rabbitTriggerRxQueue,
+                queue: rabbitTriggerPendingQueue,
                 autoAck: false,
                 consumer: consumer
             );
@@ -104,9 +95,14 @@ namespace Twig
 
         public static void PushTrigger(JObject properties)
         {
+            // Make sure queue exists
+            var queue = properties["queue"].ToString();
+            if (string.IsNullOrWhiteSpace(queue))
+                throw new ArgumentException("No response queue specified");
+
             rabbitChannel.BasicPublish(
                 exchange: "",
-                routingKey: rabbitTriggerTxQueue,
+                routingKey: queue,
                 basicProperties: rabbitProperties,
                 body: Encoding.UTF8.GetBytes(properties.ToString(Formatting.None))
             );
