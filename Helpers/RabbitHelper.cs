@@ -27,7 +27,8 @@ namespace Twig
             {
                 HostName = rabbitHost,
                 UserName = "scaley",
-                Password = "abilities"
+                Password = "abilities",
+                DispatchConsumersAsync = true
             };
 
             // Try connecting to rabbit until it works
