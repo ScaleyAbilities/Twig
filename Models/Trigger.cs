@@ -7,6 +7,7 @@ namespace Twig
         public string User { get; set; }
         public decimal Price { get; set; }
         public string Tid { get; set; }
+        public string Queue { get; set; }
     }
     internal class SortedPriceComparer : IComparer<Trigger>
     {

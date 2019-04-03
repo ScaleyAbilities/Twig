@@ -43,8 +43,6 @@ namespace Twig
         public void CheckBuy(String Symbol, decimal StockPrice) {
 
             var BuyStock = this[Symbol]["BUY"];
-            // var BuyStock = this[Symbol]["BUY"].ToList();
-            // BuyStock.Sort((x, y) => x.Value.CompareTo(y.Value));
 
             while (BuyStock.Count > 0 && BuyStock.Max.Price >= StockPrice)
             {
@@ -55,6 +53,7 @@ namespace Twig
                 JObject twigParams = new JObject();
                 twigTrigger.Add("usr", buy.User);
                 twigTrigger.Add("cmd", "BUY");
+                twigTrigger.Add("queue", buy.Queue);
                 twigParams.Add("stock", Symbol);
                 twigParams.Add("price", StockPrice);
                 twigTrigger.Add("params", twigParams);
@@ -77,6 +76,7 @@ namespace Twig
                 JObject twigParams = new JObject();
                 twigTrigger.Add("usr", sell.User);
                 twigTrigger.Add("cmd", "SELL");
+                twigTrigger.Add("queue", sell.Queue);
                 twigParams.Add("stock", Symbol);
                 twigParams.Add("price", StockPrice);
                 twigTrigger.Add("params", twigParams);
