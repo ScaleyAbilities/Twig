@@ -63,7 +63,16 @@ namespace Twig
                 if (completed == quitSignalled.Task)
                     break;
 
-                var tasks = tl.Keys.Select(async sym => tl.CheckStockTriggers(sym, await QuoteHelper.GetQuote(sym)));
+                var tasks = tl.Keys.Select(async sym => {
+                    if(tl[sym].ContainsKey("BUY")) {
+                        Trigger t = tl[sym]["BUY"].Max;
+                        await tl.CheckStockTriggers(sym, await QuoteHelper.GetQuote(sym, t.User, t.Tid));
+                    } else if(tl[sym].ContainsKey("SELL")) {
+                        Trigger t = tl[sym]["SELL"].Min;
+                        await tl.CheckStockTriggers(sym, await QuoteHelper.GetQuote(sym, t.User, t.Tid));
+                    }
+                    return;
+                });
                 await Task.WhenAll(tasks);
             }
 

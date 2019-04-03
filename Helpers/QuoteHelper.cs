@@ -17,7 +17,7 @@ namespace Twig
 
         private static ConcurrentDictionary<string, Tuple<decimal, DateTime>> quoteCache = new ConcurrentDictionary<string, Tuple<decimal, DateTime>>();
 
-        public static async Task<decimal> GetQuote(string stockSymbol) {
+        public static async Task<decimal> GetQuote(string stockSymbol, string user, string tid) {
             Tuple<decimal, DateTime> cachedQuote = null;
             quoteCache.TryGetValue(stockSymbol, out cachedQuote);
             
@@ -28,7 +28,7 @@ namespace Twig
             // Get value from Cobra
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync($"{quoteApi}/quote/admin/{stockSymbol}");
+                var response = await client.GetAsync($"{quoteApi}/quote/{user}/{stockSymbol}/{tid}");
                 response.EnsureSuccessStatusCode();
                 var json = new JObject(await response.Content.ReadAsStringAsync());
                 return (decimal)json["amount"];
