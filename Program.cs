@@ -17,7 +17,7 @@ namespace Twig
         {
             try
             {
-                ParamHelper.ValidateParamsExist(json, "cmd", "usr");
+                ParamHelper.ValidateParamsExist(json, "cmd", "usr", "tid");
             }                
             catch (ArgumentException ex)
             {
@@ -27,13 +27,14 @@ namespace Twig
 
             string command = json["cmd"].ToString().ToUpper();
             string user = json["usr"].ToString(); 
+            string tid = json["tid"].ToString();
             JObject commandParams = (JObject)json["params"];
             string stock = commandParams["stock"].ToString();
             decimal price = (decimal)commandParams["price"];
 
             await Task.Run(() => {
                 if (command.Equals("BUY") || command.Equals("SELL")) {
-                    tl.Add(stock, command, user, price);
+                    tl.Add(stock, command, user, price, tid);
                 } else if (command.Equals("CANCEL_BUY") || command.Equals("CANCEL_SELL")) {
                     tl.Remove(stock, command, user);
                 }
