@@ -60,7 +60,6 @@ namespace Twig
                 twigTrigger.Add("params", twigParams);
                 RabbitHelper.PushTrigger(twigTrigger);
                 
-                this[Symbol]["BUY"].Remove(buy);
                 BuyStock.Remove(buy);
             }
         }
@@ -72,7 +71,7 @@ namespace Twig
             while (SellStock.Count > 0 && SellStock.Min.Price <= StockPrice)
             {
                 var sell = SellStock.Min;
-                System.Console.WriteLine(SellStock);
+                System.Console.WriteLine(sell);
                 
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
@@ -83,7 +82,6 @@ namespace Twig
                 twigTrigger.Add("params", twigParams);
                 RabbitHelper.PushTrigger(twigTrigger);
                 
-                this[Symbol]["SELL"].Remove(sell);
                 SellStock.Remove(sell);
             }
         }
