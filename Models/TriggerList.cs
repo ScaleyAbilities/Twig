@@ -88,6 +88,7 @@ namespace Twig
 
         public void Remove(String Symbol, String Command, string u) {
             // Does a trigger have to be canceled before they can set a new one?
+            if(!this.ContainsKey(Symbol)) return;
             if(Command.Equals("CANCEL_BUY")) {
                 this[Symbol]["BUY"].RemoveWhere(t => t.User == u);
             } else if(Command.Equals("CANCEL_SELL")) {
