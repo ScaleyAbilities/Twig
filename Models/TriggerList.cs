@@ -23,7 +23,7 @@ namespace Twig
             }
 
             // Adds the price and user data
-            this[Symbol][Choice].Add(new Trigger(){User = u, Price = Price, Tid = tid});
+            this[Symbol][Choice].Add(new Trigger() { User = u, Price = Price, Tid = tid });
         }
 
         public async Task CheckStockTriggers(String Symbol, decimal StockPrice)
@@ -33,14 +33,16 @@ namespace Twig
             Task.WaitAll(Buy, Sell);
 
             // Removes Symbol if there are no Triggers
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 if (this[Symbol]["BUY"].Count == 0 && this[Symbol]["SELL"].Count == 0)
                     this.Remove(Symbol);
             });
         }
 
 
-        public void CheckBuy(String Symbol, decimal StockPrice) {
+        public void CheckBuy(String Symbol, decimal StockPrice)
+        {
 
             var BuyStock = this[Symbol]["BUY"];
 
@@ -48,7 +50,7 @@ namespace Twig
             {
                 var buy = BuyStock.Max;
                 System.Console.WriteLine(buy);
-                
+
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
                 twigTrigger.Add("usr", buy.User);
@@ -58,12 +60,13 @@ namespace Twig
                 twigParams.Add("price", StockPrice);
                 twigTrigger.Add("params", twigParams);
                 RabbitHelper.PushTrigger(twigTrigger);
-                
+
                 BuyStock.Remove(buy);
             }
         }
 
-        public void CheckSell(String Symbol, decimal StockPrice) {
+        public void CheckSell(String Symbol, decimal StockPrice)
+        {
 
             var SellStock = this[Symbol]["SELL"];
 
@@ -71,7 +74,7 @@ namespace Twig
             {
                 var sell = SellStock.Min;
                 System.Console.WriteLine(sell);
-                
+
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
                 twigTrigger.Add("usr", sell.User);
@@ -81,19 +84,27 @@ namespace Twig
                 twigParams.Add("price", StockPrice);
                 twigTrigger.Add("params", twigParams);
                 RabbitHelper.PushTrigger(twigTrigger);
-                
+
                 SellStock.Remove(sell);
             }
         }
 
-        public void Remove(String Symbol, String Command, string u) {
+        public void Remove(String Symbol, String Command, string u)
+        {
             // Does a trigger have to be canceled before they can set a new one?
-            if(!this.ContainsKey(Symbol)) return;
-            if(Command.Equals("CANCEL_BUY")) {
+            if (!this.ContainsKey(Symbol)) return;
+            if (Command.Equals("CANCEL_BUY"))
+            {
                 this[Symbol]["BUY"].RemoveWhere(t => t.User == u);
-            } else if(Command.Equals("CANCEL_SELL")) {
+            }
+            else if (Command.Equals("CANCEL_SELL"))
+            {
                 this[Symbol]["SELL"].RemoveWhere(t => t.User == u);
             }
+
+            // If trig is now empty, delete 
+            if (!this[Symbol]["BUY"].Any() && !this[Symbol]["SELL"].Any())
+                this.Remove(Symbol);
         }
     }
 }
