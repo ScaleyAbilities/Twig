@@ -9,7 +9,7 @@ namespace Twig
         public string Tid { get; set; }
         public string Queue { get; set; }
     }
-    internal class SortedPriceComparer : IComparer<Trigger>
+    internal class TriggerPriceComparer : IComparer<Trigger>
     {
         public int Compare(Trigger x, Trigger y)
         {

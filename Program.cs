@@ -67,11 +67,12 @@ namespace Twig
                     if(tl[sym].ContainsKey("BUY")) {
                         Trigger t = tl[sym]["BUY"].Max;
                         if(t != null)
-                            await tl.CheckStockTriggers(sym, await QuoteHelper.GetQuote(sym, t.User, t.Tid));
-                    } else if(tl[sym].ContainsKey("SELL")) {
+                            tl.CheckBuy(sym, await QuoteHelper.GetQuote(sym, t.User, t.Tid));
+                    }
+                    if(tl[sym].ContainsKey("SELL")) {
                         Trigger t = tl[sym]["SELL"].Min;
                         if(t != null)
-                            await tl.CheckStockTriggers(sym, await QuoteHelper.GetQuote(sym, t.User, t.Tid));
+                            tl.CheckSell(sym, await QuoteHelper.GetQuote(sym, t.User, t.Tid));
                     }
                     return;
                 });

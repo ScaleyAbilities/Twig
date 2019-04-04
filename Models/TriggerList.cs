@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Twig
 {
-    public class TriggerList : Dictionary<String, Dictionary<String, SortedSet<Trigger>>>
+    public class TriggerList : ConcurrentDictionary<String, Dictionary<String, SortedSet<Trigger>>>
     {
         public void Add(String Symbol, String Choice, String u, decimal Price, String tid)
         {
@@ -16,30 +17,14 @@ namespace Twig
 
             // Checks if the StockSymbol and Buy/Sell keys are in the object, adds if not
             if (!this.ContainsKey(Symbol))
-            {
                 this[Symbol] = new Dictionary<string, SortedSet<Trigger>>();
-                this[Symbol]["BUY"] = new SortedSet<Trigger>();
-                this[Symbol]["SELL"] = new SortedSet<Trigger>();
-            }
+
+            if(!this[Symbol].ContainsKey(Choice))
+                this[Symbol][Choice] = new SortedSet<Trigger>(new TriggerPriceComparer());
 
             // Adds the price and user data
             this[Symbol][Choice].Add(new Trigger() { User = u, Price = Price, Tid = tid });
         }
-
-        public async Task CheckStockTriggers(String Symbol, decimal StockPrice)
-        {
-            Task Buy = Task.Run(() => CheckBuy(Symbol, StockPrice));
-            Task Sell = Task.Run(() => CheckSell(Symbol, StockPrice));
-            Task.WaitAll(Buy, Sell);
-
-            // Removes Symbol if there are no Triggers
-            await Task.Run(() =>
-            {
-                if (this[Symbol]["BUY"].Count == 0 && this[Symbol]["SELL"].Count == 0)
-                    this.Remove(Symbol);
-            });
-        }
-
 
         public void CheckBuy(String Symbol, decimal StockPrice)
         {
@@ -49,7 +34,6 @@ namespace Twig
             while (BuyStock.Count > 0 && BuyStock.Max.Price >= StockPrice)
             {
                 var buy = BuyStock.Max;
-                System.Console.WriteLine(buy);
 
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
@@ -67,13 +51,11 @@ namespace Twig
 
         public void CheckSell(String Symbol, decimal StockPrice)
         {
-
             var SellStock = this[Symbol]["SELL"];
 
             while (SellStock.Count > 0 && SellStock.Min.Price <= StockPrice)
             {
                 var sell = SellStock.Min;
-                System.Console.WriteLine(sell);
 
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
@@ -91,20 +73,24 @@ namespace Twig
 
         public void Remove(String Symbol, String Command, string u)
         {
-            // Does a trigger have to be canceled before they can set a new one?
             if (!this.ContainsKey(Symbol)) return;
-            if (Command.Equals("CANCEL_BUY"))
+            if (Command.Equals("CANCEL_BUY") && this[Symbol].ContainsKey("BUY"))
             {
                 this[Symbol]["BUY"].RemoveWhere(t => t.User == u);
+                if(this[Symbol]["BUY"].Count == 0)
+                    this[Symbol].Remove("BUY");
             }
-            else if (Command.Equals("CANCEL_SELL"))
+            else if (Command.Equals("CANCEL_SELL") && this[Symbol].ContainsKey("SELL"))
             {
                 this[Symbol]["SELL"].RemoveWhere(t => t.User == u);
+                if(this[Symbol]["SELL"].Count == 0)
+                    this[Symbol].Remove("SELL");
             }
 
-            // If trig is now empty, delete 
-            if (!this[Symbol]["BUY"].Any() && !this[Symbol]["SELL"].Any())
-                this.Remove(Symbol);
+            if(this[Symbol].Keys.Count == 0) {
+                var s = new Dictionary<string, SortedSet<Trigger>>();
+                this.TryRemove(Symbol, out s);
+            }
         }
     }
 }
