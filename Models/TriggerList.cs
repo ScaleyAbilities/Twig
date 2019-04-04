@@ -24,6 +24,7 @@ namespace Twig
 
             // Adds the price and user data
             this[Symbol][Choice].Add(new Trigger() { User = u, Price = Price, Tid = tid });
+            Console.WriteLine("Trigger add");
         }
 
         public void CheckBuy(String Symbol, decimal StockPrice)
