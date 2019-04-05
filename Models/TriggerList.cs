@@ -38,7 +38,7 @@ namespace Twig
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
                 twigTrigger.Add("usr", buy.User);
-                twigTrigger.Add("cmd", "BUY");
+                twigTrigger.Add("cmd", "COMMIT_BUY_TRIGGER");
                 twigTrigger.Add("queue", buy.Queue);
                 twigParams.Add("stock", Symbol);
                 twigParams.Add("price", StockPrice);
@@ -60,7 +60,7 @@ namespace Twig
                 JObject twigTrigger = new JObject();
                 JObject twigParams = new JObject();
                 twigTrigger.Add("usr", sell.User);
-                twigTrigger.Add("cmd", "SELL");
+                twigTrigger.Add("cmd", "COMMIT_SELL_TRIGGER");
                 twigTrigger.Add("queue", sell.Queue);
                 twigParams.Add("stock", Symbol);
                 twigParams.Add("price", StockPrice);
