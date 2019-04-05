@@ -24,7 +24,6 @@ namespace Twig
 
             // Adds the price and user data
             this[Symbol][Choice].Add(new Trigger() { User = u, Price = Price, Tid = tid });
-            Console.WriteLine("Add");
         }
 
         public void CheckBuy(String Symbol, decimal StockPrice)
@@ -92,7 +91,6 @@ namespace Twig
                 var s = new Dictionary<string, SortedSet<Trigger>>();
                 this.TryRemove(Symbol, out s);
             }
-            Console.WriteLine("Remove");
         }
     }
 }

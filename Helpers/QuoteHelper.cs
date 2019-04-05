@@ -17,7 +17,7 @@ namespace Twig
 
         private static ConcurrentDictionary<string, Tuple<decimal, DateTime>> quoteCache = new ConcurrentDictionary<string, Tuple<decimal, DateTime>>();
 
-        public static async Task<decimal> GetQuote(string stockSymbol, string user, string tid) {
+        public static async Task<decimal> GetQuote(string user, string stockSymbol, string tid) {
             Tuple<decimal, DateTime> cachedQuote = null;
             quoteCache.TryGetValue(stockSymbol, out cachedQuote);
             
@@ -30,7 +30,7 @@ namespace Twig
             {
                 var response = await client.GetAsync($"{quoteApi}/quote/{user}/{stockSymbol}/{tid}");
                 response.EnsureSuccessStatusCode();
-                var json = new JObject(await response.Content.ReadAsStringAsync());
+                var json = JObject.Parse(await response.Content.ReadAsStringAsync());
                 return (decimal)json["amount"];
             }
         }
