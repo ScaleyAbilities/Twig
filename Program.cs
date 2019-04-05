@@ -30,6 +30,7 @@ namespace Twig
             JObject commandParams = (JObject)json["params"];
             string stock = commandParams["stock"].ToString();
 
+            Console.WriteLine(command);
             await Task.Run(() => {
                 if (command.Equals("BUY") || command.Equals("SELL")) {
                     var tid = json["tid"]?.ToString();
