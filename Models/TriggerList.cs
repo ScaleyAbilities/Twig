@@ -9,7 +9,7 @@ namespace Twig
 {
     public class TriggerList : ConcurrentDictionary<String, Dictionary<String, SortedSet<Trigger>>>
     {
-        public void Add(String Symbol, String Choice, String u, decimal Price, String tid)
+        public void Add(string Symbol, string Choice, string u, decimal Price, string tid, string queue)
         {
             Choice = Choice.ToUpper();
             Symbol = Symbol.ToUpper();
@@ -23,10 +23,10 @@ namespace Twig
                 this[Symbol][Choice] = new SortedSet<Trigger>(new TriggerPriceComparer());
 
             // Adds the price and user data
-            this[Symbol][Choice].Add(new Trigger() { User = u, Price = Price, Tid = tid });
+            this[Symbol][Choice].Add(new Trigger() { User = u, Price = Price, Tid = tid, Queue = queue });
         }
 
-        public void CheckBuy(String Symbol, decimal StockPrice)
+        public void CheckBuy(string Symbol, decimal StockPrice)
         {
 
             var BuyStock = this[Symbol]["BUY"];
@@ -49,7 +49,7 @@ namespace Twig
             }
         }
 
-        public void CheckSell(String Symbol, decimal StockPrice)
+        public void CheckSell(string Symbol, decimal StockPrice)
         {
             var SellStock = this[Symbol]["SELL"];
 
@@ -71,7 +71,7 @@ namespace Twig
             }
         }
 
-        public void Remove(String Symbol, String Command, string u)
+        public void Remove(string Symbol, string Command, string u)
         {
             if (!this.ContainsKey(Symbol)) return;
             if (Command.Equals("CANCEL_BUY") && this[Symbol].ContainsKey("BUY"))

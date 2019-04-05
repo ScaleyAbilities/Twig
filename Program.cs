@@ -34,8 +34,9 @@ namespace Twig
             await Task.Run(() => {
                 if (command.Equals("BUY") || command.Equals("SELL")) {
                     var tid = json["tid"]?.ToString();
+                    var queue = json["queue"]?.ToString();
                     var price = (decimal)commandParams["price"];
-                    tl.Add(stock, command, user, price, tid);
+                    tl.Add(stock, command, user, price, tid, queue);
                 } else if (command.Equals("CANCEL_BUY") || command.Equals("CANCEL_SELL")) {
                     tl.Remove(stock, command, user);
                 }
@@ -59,7 +60,7 @@ namespace Twig
 
             while (true)
             {
-                var completed = await Task.WhenAny(quitSignalled.Task, Task.Delay(40000));
+                var completed = await Task.WhenAny(quitSignalled.Task, Task.Delay(20000));
                 Console.WriteLine("Polling");
 
                 if (completed == quitSignalled.Task)
